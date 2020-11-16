@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	url2 "net/url"
 	"strconv"
 	"time"
 )
@@ -61,7 +62,9 @@ func (h Hass) GetSensorState(sensorId string) SensorState {
 }
 
 func (h Hass) GetSensorHistory(sensorId string, ts time.Time) [][]SensorState {
-	var url = h.baseUrl + "api/history/period/" + ts.Format("2006-01-02T15:04:05-07:00") + "?filter_entity_id=" + sensorId
+	var url = h.baseUrl + "api/history/period/" + ts.Format("2006-01-02T15:04:05-07:00") +
+		"?filter_entity_id=" + sensorId +
+		"&end_time=" + url2.QueryEscape(time.Now().Format("2006-01-02T15:04:05-07:00"))
 
 	resp := h.doRequest(url)
 
@@ -79,9 +82,9 @@ func (h Hass) GetSensorHistory(sensorId string, ts time.Time) [][]SensorState {
 	}
 
 	// fix remove wrong values
-	for k, state := range sensorStates[0] {
-		if !isNumeric(state.State) {
-			removeStateFromSlice(sensorStates[0], k)
+	for i := len(sensorStates[0]) - 1; i >= 0; i-- {
+		if !isNumeric(sensorStates[0][i].State) {
+			removeStateFromSlice(sensorStates[0], i)
 		}
 	}
 
