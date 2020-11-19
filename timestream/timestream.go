@@ -70,11 +70,11 @@ func (t Timestream) Save(records []*timestreamwrite.Record) {
 	}
 }
 
-func processScalarType(data *timestreamquery.Datum) string {
-	return *data.ScalarValue
+func processScalarType(data *timestreamquery.Datum) *string {
+	return data.ScalarValue
 }
 
-func (t Timestream) RunQuery(query string) string {
+func (t Timestream) RunQuery(query string) *string {
 	querySvc := timestreamquery.New(t.session)
 
 	queryInput := &timestreamquery.QueryInput{
