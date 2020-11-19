@@ -87,7 +87,7 @@ func (t Timestream) RunQuery(query string) *string {
 	}
 
 	if len(out.Rows) == 0 {
-		return ""
+		return nil
 	}
 
 	return processScalarType(out.Rows[0].Data[0])
