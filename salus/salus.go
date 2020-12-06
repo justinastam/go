@@ -28,6 +28,7 @@ type DeviceValues struct {
 	SetPoint float64 			`json:"CH1currentSetPoint,string"`
 	HeaterStatusString string	`json:"CH1heatOnOffStatus"`
 	HeaterStatus bool
+	Initiated bool
 }
 
 //// @todo delete
@@ -68,7 +69,9 @@ func (s *Salus) GetIsHeating() bool {
 }
 
 func (s *Salus) InitDeviceValues() {
-	// @todo ignore if values are initiated
+	if s.deviceValues.Initiated {
+		return
+	}
 
 	s.InitTokenAndDeviceId()
 
@@ -90,6 +93,7 @@ func (s *Salus) InitDeviceValues() {
 	if dv.HeaterStatusString == "1" {
 		dv.HeaterStatus = true
 	}
+	dv.Initiated = true
 
 	s.deviceValues = dv
 }
