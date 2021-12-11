@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-type Salus struct {
+type salus struct {
 	credentials  Credentials
 	token        string
 	deviceId     string
-	deviceValues DeviceValues
+	deviceValues deviceValues
 }
 
 type Credentials struct {
@@ -23,7 +23,7 @@ type Credentials struct {
 	password string
 }
 
-type DeviceValues struct {
+type deviceValues struct {
 	Temperature        float64 `json:"CH1currentRoomTemp,string"`
 	SetPoint           float64 `json:"CH1currentSetPoint,string"`
 	HeaterStatusString string  `json:"CH1heatOnOffStatus"`
@@ -42,34 +42,34 @@ type DeviceValues struct {
 //	return Credentials{email: "email", password: "pass"}
 //}
 
-func New(credentials Credentials) Salus {
-	s := Salus{
+func New(credentials Credentials) *salus {
+	s := salus{
 		credentials: credentials,
 	}
 
-	s.InitDeviceValues()
+	s.initDeviceValues()
 
-	return s
+	return &s
 }
 
-func (s *Salus) GetTemperature() float64 {
+func (s *salus) GetTemperature() float64 {
 	return s.deviceValues.Temperature
 }
 
-func (s *Salus) GetSetPoint() float64 {
+func (s *salus) GetSetPoint() float64 {
 	return s.deviceValues.SetPoint
 }
 
-func (s *Salus) GetIsHeating() bool {
+func (s *salus) GetIsHeating() bool {
 	return s.deviceValues.HeaterStatus
 }
 
-func (s *Salus) InitDeviceValues() {
+func (s *salus) initDeviceValues() {
 	if s.deviceValues.Initiated {
 		return
 	}
 
-	s.InitTokenAndDeviceId()
+	s.initTokenAndDeviceId()
 
 	url := fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", s.deviceId, s.token, time.Now().Unix())
 	resp, err := http.Get(url)
@@ -83,7 +83,7 @@ func (s *Salus) InitDeviceValues() {
 		panic(err)
 	}
 
-	dv := DeviceValues{}
+	dv := deviceValues{}
 	json.Unmarshal(bodyBytes, &dv)
 	dv.HeaterStatus = false
 	if dv.HeaterStatusString == "1" {
@@ -94,7 +94,7 @@ func (s *Salus) InitDeviceValues() {
 	s.deviceValues = dv
 }
 
-func (s *Salus) InitTokenAndDeviceId() {
+func (s *salus) initTokenAndDeviceId() {
 	if s.token != "" && s.deviceId != "" {
 		return
 	}
