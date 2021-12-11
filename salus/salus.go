@@ -12,23 +12,23 @@ import (
 )
 
 type Salus struct {
-	credentials Credentials
-	token string
-	deviceId string
+	credentials  Credentials
+	token        string
+	deviceId     string
 	deviceValues DeviceValues
 }
 
 type Credentials struct {
-	email string
+	email    string
 	password string
 }
 
 type DeviceValues struct {
-	Temperature float64 		`json:"CH1currentRoomTemp,string"`
-	SetPoint float64 			`json:"CH1currentSetPoint,string"`
-	HeaterStatusString string	`json:"CH1heatOnOffStatus"`
-	HeaterStatus bool
-	Initiated bool
+	Temperature        float64 `json:"CH1currentRoomTemp,string"`
+	SetPoint           float64 `json:"CH1currentSetPoint,string"`
+	HeaterStatusString string  `json:"CH1heatOnOffStatus"`
+	HeaterStatus       bool
+	Initiated          bool
 }
 
 //// @todo delete
@@ -43,28 +43,24 @@ type DeviceValues struct {
 //}
 
 func New(credentials Credentials) Salus {
-	salus := Salus{
+	s := Salus{
 		credentials: credentials,
 	}
 
-	return salus
+	s.InitDeviceValues()
+
+	return s
 }
 
 func (s *Salus) GetTemperature() float64 {
-	s.InitDeviceValues()
-
 	return s.deviceValues.Temperature
 }
 
 func (s *Salus) GetSetPoint() float64 {
-	s.InitDeviceValues()
-
 	return s.deviceValues.SetPoint
 }
 
 func (s *Salus) GetIsHeating() bool {
-	s.InitDeviceValues()
-
 	return s.deviceValues.HeaterStatus
 }
 
@@ -105,7 +101,7 @@ func (s *Salus) InitTokenAndDeviceId() {
 
 	client := &http.Client{}
 
-	resp, err := client.Get("https://salus-it500.com/public/login.php?");
+	resp, err := client.Get("https://salus-it500.com/public/login.php?")
 	if err != nil {
 		panic(err)
 	}
