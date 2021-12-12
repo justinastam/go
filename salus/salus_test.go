@@ -14,7 +14,7 @@ func TestGetTemperature(t *testing.T) {
 		t.Errorf("Error: %s", err.Error())
 	}
 
-	salusTemp := salus.GetTemperature()
+	salusTemp := salus.GetTemperature("STA10072968")
 	if salusTemp != expTemp {
 		t.Errorf("Temperature incorrect, got: %f, want: %f.", salusTemp, expTemp)
 	}
@@ -28,7 +28,7 @@ func TestGetSetPoint(t *testing.T) {
 		t.Errorf("Error: %s", err.Error())
 	}
 
-	setPoint := salus.GetSetPoint()
+	setPoint := salus.GetSetPoint("STA00074484")
 	if setPoint != expSP {
 		t.Errorf("Set point incorrect, got: %f, want: %f.", setPoint, expSP)
 	}
@@ -44,7 +44,7 @@ func TestIsHeating(t *testing.T) {
 		panic("Unknown expectation for heating")
 	}
 
-	heating := salus.GetIsHeating()
+	heating := salus.GetIsHeating("STA10072968")
 	if heating != expIsHeating {
 		t.Errorf("Heater status incorrect")
 	}

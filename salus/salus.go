@@ -12,10 +12,9 @@ import (
 )
 
 type salus struct {
-	credentials  Credentials
-	token        string
-	deviceId     string
-	deviceValues deviceValues
+	credentials Credentials
+	token       string
+	devices     map[string]device
 }
 
 type Credentials struct {
@@ -23,56 +22,48 @@ type Credentials struct {
 	password string
 }
 
+type device struct {
+	id     string
+	values deviceValues
+}
+
 type deviceValues struct {
 	Temperature        float64 `json:"CH1currentRoomTemp,string"`
 	SetPoint           float64 `json:"CH1currentSetPoint,string"`
 	HeaterStatusString string  `json:"CH1heatOnOffStatus"`
 	HeaterStatus       bool
-	Initiated          bool
 }
-
-//// @todo delete
-//func main() {
-//	salus := New(getCredentials())
-//	salus.GetTemperature()
-//}
-//
-//// @todo delete
-//func getCredentials() Credentials {
-//	return Credentials{email: "email", password: "pass"}
-//}
 
 func New(credentials Credentials) *salus {
 	s := salus{
 		credentials: credentials,
+		devices:     make(map[string]device),
 	}
 
-	s.initDeviceValues()
+	s.initTokenAndDeviceIds()
+
+	for i, d := range s.devices {
+		d.values = s.initDevice(d)
+		s.devices[i] = d
+	}
 
 	return &s
 }
 
-func (s *salus) GetTemperature() float64 {
-	return s.deviceValues.Temperature
+func (s *salus) GetTemperature(deviceCode string) float64 {
+	return s.devices[deviceCode].values.Temperature
 }
 
-func (s *salus) GetSetPoint() float64 {
-	return s.deviceValues.SetPoint
+func (s *salus) GetSetPoint(deviceCode string) float64 {
+	return s.devices[deviceCode].values.SetPoint
 }
 
-func (s *salus) GetIsHeating() bool {
-	return s.deviceValues.HeaterStatus
+func (s *salus) GetIsHeating(deviceCode string) bool {
+	return s.devices[deviceCode].values.HeaterStatus
 }
 
-func (s *salus) initDeviceValues() {
-	if s.deviceValues.Initiated {
-		return
-	}
-
-	s.initTokenAndDeviceId()
-
-	url := fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", s.deviceId, s.token, time.Now().Unix())
-	resp, err := http.Get(url)
+func (s *salus) initDevice(d device) deviceValues {
+	resp, err := http.Get(fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", d.id, s.token, time.Now().Unix()))
 	if err != nil {
 		panic(err)
 	}
@@ -85,20 +76,16 @@ func (s *salus) initDeviceValues() {
 
 	dv := deviceValues{}
 	json.Unmarshal(bodyBytes, &dv)
+
 	dv.HeaterStatus = false
 	if dv.HeaterStatusString == "1" {
 		dv.HeaterStatus = true
 	}
-	dv.Initiated = true
 
-	s.deviceValues = dv
+	return dv
 }
 
-func (s *salus) initTokenAndDeviceId() {
-	if s.token != "" && s.deviceId != "" {
-		return
-	}
-
+func (s *salus) initTokenAndDeviceIds() {
 	client := &http.Client{}
 
 	resp, err := client.Get("https://salus-it500.com/public/login.php?")
@@ -156,8 +143,13 @@ func (s *salus) initTokenAndDeviceId() {
 		panic(err)
 	}
 
-	re := regexp.MustCompile("control\\.php\\?devId=(\\d+)")
-	s.deviceId = string(re.FindSubmatch(bodyBytes)[1])
+	re := regexp.MustCompile("control\\.php\\?devId=(\\d+)\">([A-Z0-9]*)")
+
+	for _, sb := range re.FindAllSubmatch(bodyBytes, -1) {
+		s.devices[string(sb[2])] = device{
+			id: string(sb[1]),
+		}
+	}
 
 	re = regexp.MustCompile("<input id=\"token\" name=\"token\" type=\"hidden\" value=\"(\\d+-[a-zA-Z0-9]+)\" />")
 	s.token = string(re.FindSubmatch(bodyBytes)[1])
