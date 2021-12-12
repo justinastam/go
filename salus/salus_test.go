@@ -51,5 +51,5 @@ func TestIsHeating(t *testing.T) {
 }
 
 func getCredentials() Credentials {
-	return Credentials{email: os.Getenv("SALUS_EMAIL"), password: os.Getenv("SALUS_PASSWORD")}
+	return Credentials{Email: os.Getenv("SALUS_EMAIL"), Password: os.Getenv("SALUS_PASSWORD")}
 }

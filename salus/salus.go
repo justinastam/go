@@ -18,8 +18,8 @@ type Salus struct {
 }
 
 type Credentials struct {
-	email    string
-	password string
+	Email    string
+	Password string
 }
 
 type device struct {
@@ -95,8 +95,8 @@ func (s *Salus) initTokenAndDeviceIds() {
 	cookie := strings.Split(resp.Header["Set-Cookie"][0], ";")[0]
 
 	form := url.Values{}
-	form.Add("IDemail", s.credentials.email)
-	form.Add("password", s.credentials.password)
+	form.Add("IDemail", s.credentials.Email)
+	form.Add("password", s.credentials.Password)
 	form.Add("login", "Login")
 
 	req, err := http.NewRequest("POST", "https://salus-it500.com/public/login.php?", strings.NewReader(form.Encode()))
