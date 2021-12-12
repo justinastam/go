@@ -1,4 +1,4 @@
-package main
+package salus
 
 import (
 	"encoding/json"
