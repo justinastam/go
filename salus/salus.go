@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type salus struct {
+type Salus struct {
 	credentials Credentials
 	token       string
 	devices     map[string]device
@@ -34,8 +34,8 @@ type deviceValues struct {
 	HeaterStatus       bool
 }
 
-func New(credentials Credentials) *salus {
-	s := salus{
+func New(credentials Credentials) *Salus {
+	s := Salus{
 		credentials: credentials,
 		devices:     make(map[string]device),
 	}
@@ -50,19 +50,19 @@ func New(credentials Credentials) *salus {
 	return &s
 }
 
-func (s *salus) GetTemperature(deviceCode string) float64 {
+func (s *Salus) GetTemperature(deviceCode string) float64 {
 	return s.devices[deviceCode].values.Temperature
 }
 
-func (s *salus) GetSetPoint(deviceCode string) float64 {
+func (s *Salus) GetSetPoint(deviceCode string) float64 {
 	return s.devices[deviceCode].values.SetPoint
 }
 
-func (s *salus) GetIsHeating(deviceCode string) bool {
+func (s *Salus) GetIsHeating(deviceCode string) bool {
 	return s.devices[deviceCode].values.HeaterStatus
 }
 
-func (s *salus) initDevice(d device) deviceValues {
+func (s *Salus) initDevice(d device) deviceValues {
 	resp, err := http.Get(fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", d.id, s.token, time.Now().Unix()))
 	if err != nil {
 		panic(err)
@@ -85,7 +85,7 @@ func (s *salus) initDevice(d device) deviceValues {
 	return dv
 }
 
-func (s *salus) initTokenAndDeviceIds() {
+func (s *Salus) initTokenAndDeviceIds() {
 	client := &http.Client{}
 
 	resp, err := client.Get("https://salus-it500.com/public/login.php?")
