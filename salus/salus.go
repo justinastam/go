@@ -64,7 +64,7 @@ func (s *Salus) GetIsHeating(deviceCode string) bool {
 }
 
 func (s *Salus) initDevice(d device) deviceValues {
-	url := fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", d.id, s.token, time.Now().Unix()/int64(time.Millisecond))
+	url := fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", d.id, s.token, time.Now().UnixNano()/1000000)
 	log.Print(fmt.Sprintf("Calling: %s", url))
 	resp, err := http.Get(url)
 	if err != nil {
