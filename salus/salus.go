@@ -63,7 +63,7 @@ func (s *Salus) GetIsHeating(deviceCode string) bool {
 }
 
 func (s *Salus) initDevice(d device) deviceValues {
-	resp, err := http.Get(fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", d.id, s.token, time.Now().Unix()))
+	resp, err := http.Get(fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", d.id, s.token, time.Now().Unix()/int64(time.Millisecond)))
 	if err != nil {
 		panic(err)
 	}
