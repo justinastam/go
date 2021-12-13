@@ -35,7 +35,7 @@ type deviceValues struct {
 	HeaterStatus       bool
 }
 
-func New(credentials Credentials) Salus {
+func New(credentials Credentials) *Salus {
 	s := Salus{
 		credentials: credentials,
 		devices:     make(map[string]device),
@@ -48,22 +48,22 @@ func New(credentials Credentials) Salus {
 		s.devices[i] = d
 	}
 
-	return s
+	return &s
 }
 
-func (s Salus) GetTemperature(deviceCode string) float64 {
+func (s *Salus) GetTemperature(deviceCode string) float64 {
 	return s.devices[deviceCode].values.Temperature
 }
 
-func (s Salus) GetSetPoint(deviceCode string) float64 {
+func (s *Salus) GetSetPoint(deviceCode string) float64 {
 	return s.devices[deviceCode].values.SetPoint
 }
 
-func (s Salus) GetIsHeating(deviceCode string) bool {
+func (s *Salus) GetIsHeating(deviceCode string) bool {
 	return s.devices[deviceCode].values.HeaterStatus
 }
 
-func (s Salus) initDevice(d device) deviceValues {
+func (s *Salus) initDevice(d device) deviceValues {
 	url := fmt.Sprintf("https://salus-it500.com/public/ajax_device_values.php?devId=%s&token=%s&_=%d", d.id, s.token, time.Now().UnixNano()/1000000)
 	log.Print(fmt.Sprintf("Calling: %s", url))
 	resp, err := http.Get(url)
@@ -90,7 +90,7 @@ func (s Salus) initDevice(d device) deviceValues {
 	return dv
 }
 
-func (s Salus) initTokenAndDeviceIds() {
+func (s *Salus) initTokenAndDeviceIds() {
 	client := &http.Client{}
 
 	resp, err := client.Get("https://salus-it500.com/public/login.php?")
